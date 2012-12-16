@@ -1,4 +1,5 @@
 class UsersController < ApplicationController
+  before_filter :signed_out, only: [:new, :create]
   before_filter :signed_in_user, only: [:index, :edit, :update, :destroy]
   before_filter :correct_user, only: [:edit, :update]
   before_filter :admin_user, only: :destroy
@@ -43,12 +44,21 @@ class UsersController < ApplicationController
   end
 
   def destroy
-    User.find(params[:id]).destroy
-    flash[:success] = "User destroyed."
-    redirect_to users_url
+    @user = User.find(params[:id]) # Grab the user by id
+    if current_user?(@user) # check to see if the user you're trying to destory is the current user, yourself
+      redirect_to users_path, notice: "You can't destroy yourself." # redirect to the list of all users
+    else
+      @user.destroy
+      flash[:success] = "User destroyed."
+      redirect_to users_url
+    end
   end
 
   private
+
+    def signed_out
+      redirect_to(root_path) if signed_in?
+    end
 
     def signed_in_user
       unless signed_in?
