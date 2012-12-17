@@ -135,8 +135,10 @@ describe "Authentication" do
     end
 
     describe "as an admin user" do
-      let!(:user_admin) { FactoryGirl.create(:admin) }
+      let(:user_admin) { FactoryGirl.create(:admin) }
 
+      before { sign_in user_admin }
+      
       it "should not allow the admin user to delete themself" do
         expect { delete user_path(user_admin) }.not_to change(User, :count)
       end
